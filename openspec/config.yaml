@@ -1,32 +1,152 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Project: Automated Document Processing & Quality Control Platform.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  Product purpose:
+  Build a document-intelligence platform for academic, technical, and professional documents.
+  Primary input/output is Microsoft Word DOCX. The platform analyzes structure, applies configurable
+  formatting rules, manages figures/tables/captions, generates indexes, validates citations and
+  bibliography, checks style consistency, provides similarity/plagiarism analysis, optional AI-content
+  analysis, correction and paraphrasing suggestions, modification history, undo/redo, visual navigation,
+  quality reports, and controlled DOCX export.
 
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+  Architecture:
+  - Laravel is the primary backend/application layer.
+  - PostgreSQL is the primary database.
+  - Redis is used for queues/cache; Laravel Queue/Horizon handles long-running processing.
+  - React/TypeScript or Vue/TypeScript may be used for the frontend.
+  - DOCX processing is isolated behind a document-processing abstraction and may use PHP/Open XML
+    libraries and/or a dedicated Python processing service.
+  - Python services may handle NLP, similarity, embeddings, and advanced AI analysis.
+  - External AI, search, plagiarism, and other providers must use replaceable provider adapters.
+  - Original documents are immutable; processing operates on working copies and versions.
+
+  Product language:
+  - French (fr-FR) is the default language.
+  - Language selection is mandatory before document processing.
+  - User-facing strings must be localizable; do not hard-code French strings into business logic.
+  - Unless explicitly requested otherwise, OpenSpec artifacts are written in clear English while
+    documenting French UI behavior and labels where relevant.
+
+  Core product principles:
+  - Never modify or overwrite the original uploaded document.
+  - Every material automated modification must be reviewable and reversible.
+  - Users can accept, reject, edit, ignore, and undo applicable suggestions.
+  - Deterministic findings must be separated from probabilistic findings.
+  - Similarity is not automatically plagiarism.
+  - AI-content detection is probabilistic and is never definitive proof of AI authorship.
+  - Paraphrasing must not be designed as a way to evade plagiarism detection; citations remain required.
+  - External processing of document content must be explicit and privacy-aware.
+  - A failure affecting one element must not corrupt the original or entire processed document.
+  - Document transformations must preserve DOCX integrity and existing content wherever possible.
+  - Every document-changing action must be traceable with timestamp, actor, action type, affected
+    element, and old/new values where available.
+  - User overrides must be possible for automated quality rules unless a security/integrity constraint
+    explicitly prevents it.
+
+  Main functional domains:
+  1. Document upload, analysis, versioning, and export.
+  2. Structure and heading detection, including manual heading assignment for levels 1-6.
+  3. Figures, tables, captions, sources, numbering, and page-integrity handling.
+  4. Table of contents, list of figures, list of tables, and list of abbreviations.
+  5. Citation validation, bibliography normalization, formatting, and duplicate detection.
+  6. Bidirectional citation/bibliography visualization.
+  7. Configurable style profiles and style consistency checking.
+  8. Structure visualizer, section/page indicator, outline-level indicators, paragraph marks,
+     and manual page breaks.
+  9. Modification history with at least 50 recent undoable actions.
+  10. Quality-control issues, reports, and user review workflows.
+  11. Similarity/plagiarism analysis using local and approved external providers.
+  12. AI-content analysis presented only as an estimate with appropriate confidence.
+  13. Grammar, correction, synonym, citation, and paraphrasing suggestions.
+  14. Privacy, security, and offline-capable processing where practical.
+
+  Default style profile:
+  - Font: Times New Roman.
+  - Body text: 11 pt, black, justified.
+  - Heading levels 1-6, numbering, indentation, captions, sources, borders, shading, indexing,
+    and alignment follow the master Project.md specification and remain configurable.
+
+  Processing pipeline:
+  Upload -> language selection -> style selection -> protected working version -> document analysis ->
+  structure/heading/figure/table/citation/bibliography/abbreviation detection -> quality analysis ->
+  optional similarity/AI analysis -> user review -> accepted transformations -> final validation ->
+  report -> DOCX/PDF export.
+
+  Quality and integrity:
+  - DOCX processing must be validated against realistic fixtures containing headings, numbering, tables,
+    figures, captions, sources, headers, footers, sections, page breaks, bibliography, citations,
+    footnotes, and existing Word styles.
+  - A DOCX proof of concept is required before committing to the complete document engine.
+  - Long-running operations must use background jobs.
+  - Controllers orchestrate requests only; business logic belongs in domain services, actions, jobs,
+    or dedicated processing components.
+  - External services must be abstracted behind interfaces/adapters.
+  - Sensitive document content must not be written into ordinary application logs.
+
+rules:
+  proposal:
+    - Clearly define the user problem, expected behavior, affected modules, and non-goals.
+    - Identify whether the change affects DOCX integrity, user content, citations, bibliography,
+      privacy, or external processing.
+    - State backward-compatibility and migration/versioning implications for existing documents.
+    - Distinguish deterministic behavior from probabilistic/AI behavior.
+    - Include user review, rollback, or undo behavior for any document-changing operation.
+    - Include acceptance criteria verifiable with a real DOCX fixture when applicable.
+    - Do not introduce an external provider without an adapter boundary and failure behavior.
+
+  specs:
+    - Write requirements as observable product behavior rather than implementation details.
+    - Use Given/When/Then scenarios for important workflows and edge cases.
+    - Cover happy paths, user overrides, malformed/unsupported DOCX content, and failure recovery.
+    - For transformations, specify what must remain unchanged as well as what changes.
+    - For similarity/plagiarism/AI analysis, state uncertainty and avoid absolute authorship or
+      plagiarism claims.
+    - For citations and bibliography, cover citation-to-reference and reference-to-citation validation.
+    - For figures/tables, cover numbering, captions, sources, page integrity, and oversized elements.
+    - For style rules, identify the relevant profile and whether the rule is enforceable, suggestive,
+      or audit-only.
+
+  design:
+    - Prefer modular domain boundaries over large controllers or monolithic services.
+    - Separate Laravel application/orchestration from DOCX manipulation and NLP/AI concerns.
+    - Define interfaces for document processors, similarity providers, AI providers, and exporters.
+    - Define queue boundaries for long-running work and retry/idempotency behavior.
+    - Include data ownership, versioning, audit/history, and rollback considerations.
+    - Include DOCX integrity/preservation strategy for every transformation touching Word content.
+    - Include security/privacy whenever document content can leave the application.
+    - Use diagrams or sequence flows for complex processing pipelines.
+    - Avoid coupling the core product to one external AI, search, or plagiarism provider.
+
+  tasks:
+    - Break implementation into independently testable tasks.
+    - Include unit tests for business rules and integration tests for workflows.
+    - Every DOCX transformation task includes a fixture-based validation test.
+    - UI document-review tasks include acceptance/rejection/undo behavior where relevant.
+    - API tasks include validation, authorization, error handling, and idempotency where needed.
+    - Background jobs define queue, retry, failure, and observability behavior.
+    - External-provider tasks include adapter tests and provider-failure handling.
+    - Do not mark document-processing work complete until generated DOCX integrity is verified.
+    - Keep migrations backward compatible with existing document versions unless explicitly changed.
+    - Include security/privacy tests for file uploads and external content processing where applicable.
+
+operations:
+  apply:
+    guidance:
+      - Read relevant specs and design before implementing.
+      - Implement in small, verifiable increments.
+      - Run targeted tests after each document-processing change.
+      - Validate generated DOCX files against fixtures and ensure the original file remains unchanged.
+      - Do not silently change requirements; update the change proposal/spec/design first.
+      - For external services, test timeout, rate-limit, unavailable-provider, and malformed-response cases.
+      - Keep document contents out of logs.
+      - Before completion, run relevant unit, integration, and document-integrity tests.
+
+  archive:
+    guidance:
+      - Confirm implemented behavior matches approved specs and tasks.
+      - Record important limitations, unsupported DOCX structures, and provider limitations.
+      - Preserve migration/versioning notes for existing documents.
+      - Confirm tests passed and original-document immutability remains satisfied.
+      - Summarize deferred work as explicit follow-up changes rather than silently omitting it.
