@@ -93,6 +93,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Docformat Queue Names
+    |--------------------------------------------------------------------------
+    |
+    | Named queues used by the document processing pipeline. Each queue
+    | handles a specific workload to isolate resource-heavy operations.
+    |
+    */
+
+    'docformat' => [
+        'document-processing' => env('QUEUE_DOCUMENT_PROCESSING', 'document-processing'),
+        'nlp' => env('QUEUE_NLP', 'nlp'),
+        'external-api' => env('QUEUE_EXTERNAL_API', 'external-api'),
+        'exports' => env('QUEUE_EXPORTS', 'exports'),
+        'reports' => env('QUEUE_REPORTS', 'reports'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Job Batching
     |--------------------------------------------------------------------------
     |

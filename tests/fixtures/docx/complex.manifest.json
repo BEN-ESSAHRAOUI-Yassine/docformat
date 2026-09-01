@@ -1,0 +1,18 @@
+{
+    "headings": 12,
+    "tables": 2,
+    "images": 0,
+    "pageBreaks": 1,
+    "paragraphs": 6,
+    "sections": 1,
+    "tableDetails": [
+        {
+            "rows": 3,
+            "cells": 9
+        },
+        {
+            "rows": 4,
+            "cells": 8
+        }
+    ]
+}
