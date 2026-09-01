@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDocumentRequest;
 use App\Http\Resources\DocumentResource;
+use App\Jobs\AnalyzeDocumentJob;
 use App\Models\Document;
 use App\Models\Project;
 use App\Services\DocumentUploadService;
@@ -67,6 +68,8 @@ class DocumentController extends Controller
         );
 
         $document->load('currentVersion');
+
+        AnalyzeDocumentJob::dispatch($document);
 
         return (new DocumentResource($document))
             ->response()
