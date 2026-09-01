@@ -27,4 +27,9 @@ class DocumentPolicy
     {
         return $user->id === $document->project->owner_id;
     }
+
+    public function trigger(User $user, Document $document): bool
+    {
+        return $user->id === $document->project->owner_id;
+    }
 }

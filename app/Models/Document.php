@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\DocumentStatus;
+use App\Enums\EnforcementMode;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,6 +20,8 @@ class Document extends Model
         'original_filename',
         'project_id',
         'status',
+        'language',
+        'enforcement_mode',
         'current_version_id',
         'file_hash',
     ];
@@ -27,6 +30,7 @@ class Document extends Model
     {
         return [
             'status' => DocumentStatus::class,
+            'enforcement_mode' => EnforcementMode::class,
         ];
     }
 
@@ -48,5 +52,15 @@ class Document extends Model
     public function elements(): HasMany
     {
         return $this->hasMany(DocumentElement::class);
+    }
+
+    public function analyses(): HasMany
+    {
+        return $this->hasMany(DocumentAnalysis::class);
+    }
+
+    public function latestAnalysis(): HasOne
+    {
+        return $this->hasOne(DocumentAnalysis::class)->latestOfMany();
     }
 }

@@ -34,7 +34,7 @@ it('allows authenticated user to upload a docx file', function () {
     $this->assertDatabaseHas('documents', [
         'name' => 'Test Document',
         'project_id' => $this->project->id,
-        'status' => 'uploaded',
+        'status' => 'analysis_completed',
     ]);
 });
 
