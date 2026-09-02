@@ -1,0 +1,45 @@
+import { NavLink } from 'react-router-dom'
+import { LayoutDashboard, FileText, Palette } from 'lucide-react'
+import { useAuthStore } from '../../stores/authStore'
+
+const nav = [
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/documents', label: 'Documents', icon: FileText },
+  { to: '/style-profiles', label: 'Style Profiles', icon: Palette },
+]
+
+export default function Sidebar() {
+  const user = useAuthStore((s) => s.user)
+
+  return (
+    <aside className="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 flex flex-col">
+      <div className="h-16 flex items-center px-6 border-b border-slate-200">
+        <span className="text-xl font-bold text-blue-600">DocFormat</span>
+      </div>
+      <nav className="flex-1 px-3 py-4 space-y-1">
+        {nav.map(({ to, label, icon: Icon }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition ${
+                isActive
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-slate-600 hover:bg-slate-100'
+              }`
+            }
+          >
+            <Icon size={18} />
+            {label}
+          </NavLink>
+        ))}
+      </nav>
+      {user && (
+        <div className="px-3 py-4 border-t border-slate-200">
+          <p className="text-sm font-medium text-slate-900 truncate">{user.name}</p>
+          <p className="text-xs text-slate-500 truncate">{user.email}</p>
+        </div>
+      )}
+    </aside>
+  )
+}

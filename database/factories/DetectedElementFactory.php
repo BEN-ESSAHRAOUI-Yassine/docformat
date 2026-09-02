@@ -42,4 +42,62 @@ class DetectedElementFactory extends Factory
             'type' => 'paragraph',
         ]);
     }
+
+    public function figure(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'type' => 'figure',
+            'content' => null,
+            'metadata' => [
+                'name' => 'image_'.fake()->numberBetween(1, 100),
+                'image_type' => fake()->randomElement(['image/png', 'image/jpeg', 'image/gif']),
+                'width' => fake()->numberBetween(100, 800),
+                'height' => fake()->numberBetween(100, 600),
+                'is_watermark' => false,
+                'section' => fake()->numberBetween(0, 5),
+            ],
+        ]);
+    }
+
+    public function table(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'type' => 'table',
+            'content' => null,
+            'metadata' => [
+                'rows' => fake()->numberBetween(2, 10),
+                'columns' => fake()->numberBetween(2, 6),
+                'cells' => fake()->numberBetween(4, 60),
+                'has_header' => fake()->boolean(),
+                'column_widths' => [],
+                'content' => [],
+                'section' => fake()->numberBetween(0, 5),
+            ],
+        ]);
+    }
+
+    public function caption(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'type' => 'caption',
+            'content' => fake()->sentence(),
+            'metadata' => [
+                'label' => fake()->randomElement(['Figure', 'Tableau']),
+                'number' => fake()->numberBetween(1, 20),
+                'element_type' => fake()->randomElement(['figure', 'table']),
+                'section' => fake()->numberBetween(0, 5),
+            ],
+        ]);
+    }
+
+    public function source(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'type' => 'source',
+            'content' => fake()->sentence(),
+            'metadata' => [
+                'section' => fake()->numberBetween(0, 5),
+            ],
+        ]);
+    }
 }
