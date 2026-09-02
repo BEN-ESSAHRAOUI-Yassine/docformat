@@ -145,12 +145,44 @@ class DocumentAnalysisService
 
         if ($element instanceof Table) {
             $rows = $element->getRows();
+            $cells = 0;
+            $content = [];
+            $hasHeader = false;
+            $columnWidths = [];
+
+            foreach ($rows as $rowIndex => $row) {
+                $rowCells = $row->getCells();
+                $cells += count($rowCells);
+                $rowData = [];
+
+                if ($rowIndex === 0) {
+                    $hasHeader = true;
+                }
+
+                foreach ($rowCells as $cellIndex => $cell) {
+                    $rowData[] = $this->extractTextFromElement($cell);
+
+                    if ($rowIndex === 0 && method_exists($cell, 'getStyle')) {
+                        $cellStyle = $cell->getStyle();
+                        if ($cellStyle && method_exists($cellStyle, 'getWidth')) {
+                            $columnWidths[$cellIndex] = $cellStyle->getWidth();
+                        }
+                    }
+                }
+
+                $content[] = $rowData;
+            }
 
             return array_merge($base, [
                 'type' => 'table',
                 'content' => null,
                 'metadata' => [
                     'rows' => count($rows),
+                    'columns' => $cells > 0 ? (int) ceil($cells / count($rows)) : 0,
+                    'cells' => $cells,
+                    'has_header' => $hasHeader,
+                    'column_widths' => $columnWidths,
+                    'content' => $content,
                     'section' => $sectionIndex,
                 ],
             ]);
@@ -158,13 +190,39 @@ class DocumentAnalysisService
 
         if ($element instanceof Image) {
             $style = $element->getStyle();
+            $name = 'image_'.$index;
+            $imageType = null;
+
+            if (method_exists($element, 'getName')) {
+                $n = $element->getName();
+                if ($n) {
+                    $name = $n;
+                }
+            }
+
+            if (method_exists($element, 'getSource')) {
+                $source = $element->getSource();
+                if (is_string($source) && strlen($source) >= 4) {
+                    $header = substr($source, 0, 4);
+                    if (str_starts_with($header, "\x89PNG")) {
+                        $imageType = 'image/png';
+                    } elseif (str_starts_with($header, "\xFF\xD8\xFF")) {
+                        $imageType = 'image/jpeg';
+                    } elseif (str_starts_with($header, 'GIF8')) {
+                        $imageType = 'image/gif';
+                    }
+                }
+            }
 
             return array_merge($base, [
                 'type' => 'figure',
                 'content' => null,
                 'metadata' => [
+                    'name' => $name,
+                    'image_type' => $imageType,
                     'width' => $style->getWidth(),
                     'height' => $style->getHeight(),
+                    'is_watermark' => $element->isWatermark(),
                     'section' => $sectionIndex,
                 ],
             ]);
@@ -225,5 +283,25 @@ class DocumentAnalysisService
                 ],
             ]);
         }
+    }
+
+    private function extractTextFromElement(AbstractElement $element): string
+    {
+        if ($element instanceof Text) {
+            return $element->getText();
+        }
+
+        if ($element instanceof TextRun) {
+            $text = '';
+            foreach ($element->getElements() as $child) {
+                if ($child instanceof Text) {
+                    $text .= $child->getText();
+                }
+            }
+
+            return $text;
+        }
+
+        return '';
     }
 }

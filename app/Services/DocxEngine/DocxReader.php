@@ -118,7 +118,7 @@ class DocxReader
     /**
      * Extract tables from the document.
      *
-     * @return array<int, array{rows: int, cells: int, content: array}>
+     * @return array<int, array{rows: int, cells: int, content: array, columnCount: int, hasHeader: bool, columnWidths: array<int, int>, properties: array}>
      */
     public function extractTables(): array
     {
@@ -142,7 +142,7 @@ class DocxReader
     /**
      * Extract images from the document.
      *
-     * @return array<int, array{index: int, isWatermark: bool, style: array}>
+     * @return array<int, array{index: int, isWatermark: bool, style: array, name: string, type: string|null, source: string|null}>
      */
     public function extractImages(): array
     {
@@ -156,15 +156,7 @@ class DocxReader
         foreach ($this->phpWord->getSections() as $section) {
             foreach ($section->getElements() as $element) {
                 if ($element instanceof Image) {
-                    $style = $element->getStyle();
-                    $images[] = [
-                        'index' => $index++,
-                        'isWatermark' => $element->isWatermark(),
-                        'style' => [
-                            'width' => $style->getWidth(),
-                            'height' => $style->getHeight(),
-                        ],
-                    ];
+                    $images[] = $this->extractImageData($element, $index++);
                 }
             }
         }
@@ -332,21 +324,103 @@ class DocxReader
             'rows' => count($rows),
             'cells' => 0,
             'content' => [],
+            'columnCount' => 0,
+            'hasHeader' => false,
+            'columnWidths' => [],
+            'properties' => [
+                'borders' => null,
+                'alignment' => null,
+                'cellMargin' => null,
+            ],
         ];
 
-        foreach ($rows as $row) {
+        $style = $table->getStyle();
+        if ($style) {
+            if (method_exists($style, 'getBorders')) {
+                $borders = $style->getBorders();
+                $tableData['properties']['borders'] = $borders !== null;
+            }
+            if (method_exists($style, 'getAlignment')) {
+                $tableData['properties']['alignment'] = $style->getAlignment();
+            }
+        }
+
+        foreach ($rows as $rowIndex => $row) {
             $cells = $row->getCells();
             $tableData['cells'] += count($cells);
             $rowData = [];
 
-            foreach ($cells as $cell) {
+            if ($rowIndex === 0) {
+                $tableData['hasHeader'] = true;
+                $tableData['columnCount'] = count($cells);
+            }
+
+            foreach ($cells as $cellIndex => $cell) {
                 $rowData[] = $this->extractTextFromElement($cell);
+
+                if ($rowIndex === 0 && method_exists($cell, 'getStyle')) {
+                    $cellStyle = $cell->getStyle();
+                    if ($cellStyle && method_exists($cellStyle, 'getWidth')) {
+                        $tableData['columnWidths'][$cellIndex] = $cellStyle->getWidth();
+                    }
+                }
             }
 
             $tableData['content'][] = $rowData;
         }
 
         return $tableData;
+    }
+
+    private function extractImageData(Image $image, int $index): array
+    {
+        $style = $image->getStyle();
+        $data = [
+            'index' => $index,
+            'isWatermark' => $image->isWatermark(),
+            'style' => [
+                'width' => $style->getWidth(),
+                'height' => $style->getHeight(),
+            ],
+            'name' => 'image_'.$index,
+            'type' => null,
+            'source' => null,
+        ];
+
+        if (method_exists($image, 'getSource')) {
+            $source = $image->getSource();
+            if (is_resource($source) || is_string($source)) {
+                $data['source'] = 'binary';
+                $data['type'] = $this->detectImageType($source);
+            }
+        }
+
+        if (method_exists($image, 'getName')) {
+            $name = $image->getName();
+            if ($name) {
+                $data['name'] = $name;
+            }
+        }
+
+        return $data;
+    }
+
+    private function detectImageType($source): ?string
+    {
+        if (is_string($source) && strlen($source) >= 4) {
+            $header = substr($source, 0, 4);
+            if (str_starts_with($header, "\x89PNG")) {
+                return 'image/png';
+            }
+            if (str_starts_with($header, "\xFF\xD8\xFF")) {
+                return 'image/jpeg';
+            }
+            if (str_starts_with($header, 'GIF8')) {
+                return 'image/gif';
+            }
+        }
+
+        return null;
     }
 
     private function extractFromSection(Section $section, array &$result): void
@@ -370,15 +444,7 @@ class DocxReader
             } elseif ($element instanceof Table) {
                 $result['tables'][] = $this->extractTableData($element);
             } elseif ($element instanceof Image) {
-                $style = $element->getStyle();
-                $result['images'][] = [
-                    'index' => count($result['images']),
-                    'isWatermark' => $element->isWatermark(),
-                    'style' => [
-                        'width' => $style->getWidth(),
-                        'height' => $style->getHeight(),
-                    ],
-                ];
+                $result['images'][] = $this->extractImageData($element, count($result['images']));
             } elseif ($element instanceof PageBreak) {
                 $result['pageBreaks'][] = count($result['pageBreaks']);
             } elseif ($element instanceof Text) {
