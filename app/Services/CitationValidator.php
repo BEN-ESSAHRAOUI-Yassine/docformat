@@ -2,12 +2,19 @@
 
 namespace App\Services;
 
+use App\Enums\ActionOrigin;
+use App\Enums\ActionType;
+use App\Enums\Reversibility;
 use App\Models\Citation;
 use App\Models\Document;
 use Illuminate\Support\Collection;
 
 class CitationValidator
 {
+    public function __construct(
+        private ?ActionLogger $actionLogger = null,
+    ) {}
+
     /**
      * Validate citations against bibliography entries for a document.
      */
@@ -66,7 +73,27 @@ class CitationValidator
                 $match = $this->findMatchingEntry($citation, $entries);
 
                 if ($match) {
+                    $oldEntryId = $citation->bibliography_entry_id;
                     $citation->update(['bibliography_entry_id' => $match->id]);
+
+                    $this->actionLogger?->record($document, [
+                        'action_type' => ActionType::CitationLinked,
+                        'element_type' => 'Citation',
+                        'element_id' => $citation->id,
+                        'origin' => ActionOrigin::Automatic,
+                        'old_value' => [
+                            'model' => 'Citation',
+                            'id' => $citation->id,
+                            'attributes' => ['bibliography_entry_id' => $oldEntryId],
+                        ],
+                        'new_value' => [
+                            'model' => 'Citation',
+                            'id' => $citation->id,
+                            'attributes' => ['bibliography_entry_id' => $match->id],
+                        ],
+                        'reversibility' => Reversibility::Full,
+                    ]);
+
                     $issues['info'][] = [
                         'type' => 'auto_linked',
                         'citation_id' => $citation->id,

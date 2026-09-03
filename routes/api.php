@@ -5,8 +5,14 @@ use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\BibliographyController;
 use App\Http\Controllers\CitationController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\ExportController;
+use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\IssueController;
+use App\Http\Controllers\PageBreakController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\QualityController;
 use App\Http\Controllers\ReferenceController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StyleAnalysisController;
 use App\Http\Controllers\StyleProfileController;
 use Illuminate\Http\Request;
@@ -40,6 +46,29 @@ Route::prefix('v1')->group(function () {
 
         Route::get('/documents/{document}/bibliography', [BibliographyController::class, 'index']);
         Route::get('/documents/{document}/bibliography/{entry}/citations', [BibliographyController::class, 'citations']);
+        Route::post('/documents/{document}/bibliography/{entry}/merge', [BibliographyController::class, 'merge']);
+
+        Route::get('/documents/{document}/actions', [HistoryController::class, 'index']);
+        Route::get('/documents/{document}/history', [HistoryController::class, 'history']);
+        Route::post('/documents/{document}/undo', [HistoryController::class, 'undo']);
+        Route::post('/documents/{document}/redo', [HistoryController::class, 'redo']);
+
+        Route::get('/documents/{document}/issues', [IssueController::class, 'index']);
+        Route::post('/documents/{document}/issues/{issue}/accept', [IssueController::class, 'accept']);
+        Route::post('/documents/{document}/issues/{issue}/reject', [IssueController::class, 'reject']);
+        Route::post('/documents/{document}/issues/{issue}/edit', [IssueController::class, 'edit']);
+        Route::post('/documents/{document}/issues/{issue}/ignore', [IssueController::class, 'ignore']);
+        Route::post('/documents/{document}/issues/bulk', [IssueController::class, 'bulk']);
+
+        Route::post('/documents/{document}/page-breaks', [PageBreakController::class, 'store']);
+        Route::delete('/documents/{document}/page-breaks/{element}', [PageBreakController::class, 'destroy']);
+
+        Route::get('/documents/{document}/quality', [QualityController::class, 'show']);
+        Route::get('/documents/{document}/report', [ReportController::class, 'show']);
+        Route::post('/documents/{document}/report/generate', [ReportController::class, 'generate']);
+        Route::post('/documents/{document}/export', [ExportController::class, 'store']);
+        Route::get('/documents/{document}/download', [ExportController::class, 'download']);
+        Route::get('/documents/{document}/download/stream', [ExportController::class, 'stream']);
 
         Route::apiResource('style-profiles', StyleProfileController::class);
         Route::post('/style-profiles/import', [StyleProfileController::class, 'import']);

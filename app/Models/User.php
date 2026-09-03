@@ -24,6 +24,16 @@ class User extends Authenticatable
         return $this->hasMany(Project::class, 'owner_id');
     }
 
+    public function actions(): HasMany
+    {
+        return $this->hasMany(DocumentAction::class);
+    }
+
+    public function reviewedIssues(): HasMany
+    {
+        return $this->hasMany(DocumentIssue::class, 'reviewed_by');
+    }
+
     protected function casts(): array
     {
         return [

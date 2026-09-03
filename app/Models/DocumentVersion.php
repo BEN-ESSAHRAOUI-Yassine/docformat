@@ -16,6 +16,7 @@ class DocumentVersion extends Model
         'file_path',
         'file_size',
         'mime_type',
+        'kind',
         'uploaded_by',
     ];
 

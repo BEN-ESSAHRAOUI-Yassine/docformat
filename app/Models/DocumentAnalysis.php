@@ -39,4 +39,14 @@ class DocumentAnalysis extends Model
     {
         return $this->hasMany(DetectedElement::class);
     }
+
+    public function issues(): HasMany
+    {
+        return $this->hasMany(DocumentIssue::class);
+    }
+
+    public function violations(): HasMany
+    {
+        return $this->hasMany(StyleViolation::class);
+    }
 }
