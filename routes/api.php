@@ -1,8 +1,12 @@
 <?php
 
+use App\Http\Controllers\AbbreviationController;
 use App\Http\Controllers\AnalysisController;
+use App\Http\Controllers\BibliographyController;
+use App\Http\Controllers\CitationController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ReferenceController;
 use App\Http\Controllers\StyleAnalysisController;
 use App\Http\Controllers\StyleProfileController;
 use Illuminate\Http\Request;
@@ -24,6 +28,18 @@ Route::prefix('v1')->group(function () {
         Route::get('/documents/{document}/analysis', [AnalysisController::class, 'show']);
         Route::post('/documents/{document}/analyze-style', [StyleAnalysisController::class, 'store']);
         Route::get('/documents/{document}/style-violations', [StyleAnalysisController::class, 'index']);
+
+        Route::post('/documents/{document}/validate-references', [ReferenceController::class, 'validateReferences']);
+        Route::get('/documents/{document}/reference-issues', [ReferenceController::class, 'referenceIssues']);
+
+        Route::get('/documents/{document}/abbreviations', [AbbreviationController::class, 'index']);
+        Route::get('/documents/{document}/abbreviation-issues', [AbbreviationController::class, 'issues']);
+
+        Route::get('/documents/{document}/citations', [CitationController::class, 'index']);
+        Route::get('/documents/{document}/citations/{citation}/bibliography-entry', [CitationController::class, 'bibliographyEntry']);
+
+        Route::get('/documents/{document}/bibliography', [BibliographyController::class, 'index']);
+        Route::get('/documents/{document}/bibliography/{entry}/citations', [BibliographyController::class, 'citations']);
 
         Route::apiResource('style-profiles', StyleProfileController::class);
         Route::post('/style-profiles/import', [StyleProfileController::class, 'import']);

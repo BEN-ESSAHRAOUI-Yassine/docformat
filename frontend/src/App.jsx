@@ -10,6 +10,10 @@ import DocumentUpload from './pages/documents/DocumentUpload'
 import DocumentView from './pages/documents/DocumentView'
 import StyleProfileList from './pages/style-profiles/StyleProfileList'
 import StyleProfileEditor from './pages/style-profiles/StyleProfileEditor'
+import CitationList from './pages/citations/CitationList'
+import BibliographyList from './pages/bibliography/BibliographyList'
+import BibliographyDetail from './pages/bibliography/BibliographyDetail'
+import AbbreviationList from './pages/abbreviations/AbbreviationList'
 
 import AppLayout from './components/layout/AppLayout'
 
@@ -38,6 +42,10 @@ export default function App() {
           <Route path="/documents" element={<DocumentList />} />
           <Route path="/documents/upload" element={<DocumentUpload />} />
           <Route path="/documents/:id" element={<DocumentView />} />
+          <Route path="/documents/:id/citations" element={<CitationList />} />
+          <Route path="/documents/:id/bibliography" element={<BibliographyList />} />
+          <Route path="/documents/:id/bibliography/:entryId" element={<BibliographyDetail />} />
+          <Route path="/documents/:id/abbreviations" element={<AbbreviationList />} />
           <Route path="/style-profiles" element={<StyleProfileList />} />
           <Route path="/style-profiles/:id/edit" element={<StyleProfileEditor />} />
         </Route>
