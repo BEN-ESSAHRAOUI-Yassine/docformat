@@ -33,9 +33,9 @@ class AnalyzeStyleJob implements ShouldQueue
             return;
         }
 
-        $elements = $analysis->elements()->get();
+        $elements = $analysis->detectedElements()->get();
 
-        $violations = $engine->analyze($elements, $this->profile);
+        $violations = $engine->analyze($elements, $this->profile, [], $this->document->enforcement_mode);
 
         foreach ($violations as $violation) {
             StyleViolation::create([

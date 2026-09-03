@@ -1,5 +1,5 @@
 import { NavLink, useParams } from 'react-router-dom'
-import { LayoutDashboard, FileText, Palette, BookOpen, BookMarked, TextQuote } from 'lucide-react'
+import { LayoutDashboard, FileText, Palette, BookOpen, BookMarked, TextQuote, ShieldAlert, History, FileBarChart } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 
 const mainNav = [
@@ -78,6 +78,45 @@ export default function Sidebar() {
             >
               <TextQuote size={18} />
               Abbreviations
+            </NavLink>
+            <NavLink
+              to={`/documents/${documentId}/issues`}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition ${
+                  isActive
+                    ? 'bg-blue-50 text-blue-700'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`
+              }
+            >
+              <ShieldAlert size={18} />
+              Issues
+            </NavLink>
+            <NavLink
+              to={`/documents/${documentId}/report`}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition ${
+                  isActive
+                    ? 'bg-blue-50 text-blue-700'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`
+              }
+            >
+              <FileBarChart size={18} />
+              Report
+            </NavLink>
+            <NavLink
+              to={`/documents/${documentId}`}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition ${
+                  isActive
+                    ? 'bg-blue-50 text-blue-700'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`
+              }
+            >
+              <History size={18} />
+              Workspace
             </NavLink>
           </>
         )}

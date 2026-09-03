@@ -8,12 +8,14 @@ import Dashboard from './pages/Dashboard'
 import DocumentList from './pages/documents/DocumentList'
 import DocumentUpload from './pages/documents/DocumentUpload'
 import DocumentView from './pages/documents/DocumentView'
+import DocumentIssues from './pages/documents/DocumentIssues'
 import StyleProfileList from './pages/style-profiles/StyleProfileList'
 import StyleProfileEditor from './pages/style-profiles/StyleProfileEditor'
 import CitationList from './pages/citations/CitationList'
 import BibliographyList from './pages/bibliography/BibliographyList'
 import BibliographyDetail from './pages/bibliography/BibliographyDetail'
 import AbbreviationList from './pages/abbreviations/AbbreviationList'
+import QualityReport from './pages/reports/QualityReport'
 
 import AppLayout from './components/layout/AppLayout'
 
@@ -42,6 +44,8 @@ export default function App() {
           <Route path="/documents" element={<DocumentList />} />
           <Route path="/documents/upload" element={<DocumentUpload />} />
           <Route path="/documents/:id" element={<DocumentView />} />
+          <Route path="/documents/:id/issues" element={<DocumentIssues />} />
+          <Route path="/documents/:id/report" element={<QualityReport />} />
           <Route path="/documents/:id/citations" element={<CitationList />} />
           <Route path="/documents/:id/bibliography" element={<BibliographyList />} />
           <Route path="/documents/:id/bibliography/:entryId" element={<BibliographyDetail />} />

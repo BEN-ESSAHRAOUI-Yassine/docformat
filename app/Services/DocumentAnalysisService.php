@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Enums\ActionOrigin;
+use App\Enums\ActionType;
 use App\Enums\AnalysisStatus;
+use App\Enums\Reversibility;
 use App\Models\DetectedElement;
 use App\Models\Document;
 use App\Models\DocumentAnalysis;
@@ -23,6 +26,7 @@ class DocumentAnalysisService
     public function __construct(
         private DocxReader $reader,
         private HeadingDetectionService $headingDetection,
+        private ActionLogger $actionLogger,
     ) {}
 
     public function analyze(Document $document, DocumentVersion $version): DocumentAnalysis
@@ -94,6 +98,24 @@ class DocumentAnalysisService
                 'original_data' => $originalData,
                 'manual' => true,
             ]),
+        ]);
+
+        $this->actionLogger->record($element->document, [
+            'action_type' => ActionType::HeadingAssigned,
+            'element_type' => 'DetectedElement',
+            'element_id' => $element->id,
+            'origin' => ActionOrigin::Manual,
+            'old_value' => [
+                'model' => 'DetectedElement',
+                'id' => $element->id,
+                'attributes' => $element->getOriginal(),
+            ],
+            'new_value' => [
+                'model' => 'DetectedElement',
+                'id' => $element->id,
+                'attributes' => $element->refresh()->toArray(),
+            ],
+            'reversibility' => Reversibility::Full,
         ]);
 
         return $element;

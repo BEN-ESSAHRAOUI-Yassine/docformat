@@ -6,6 +6,8 @@ use App\Models\DocumentVersion;
 use App\Models\Project;
 use App\Models\User;
 use App\Services\DocumentAnalysisService;
+use App\Services\IssueCollector;
+use App\Services\ReviewStatusService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 
@@ -41,7 +43,7 @@ it('sets status to failed when document has no version', function () {
     ]);
 
     $job = new AnalyzeDocumentJob($document);
-    $job->handle(app(DocumentAnalysisService::class));
+    $job->handle(app(DocumentAnalysisService::class), app(IssueCollector::class), app(ReviewStatusService::class));
 
     expect($document->fresh()->status->value)->toBe('failed');
 });
@@ -60,7 +62,7 @@ it('sets status to failed on exception', function () {
     $job = new AnalyzeDocumentJob($document);
 
     try {
-        $job->handle(app(DocumentAnalysisService::class));
+        $job->handle(app(DocumentAnalysisService::class), app(IssueCollector::class), app(ReviewStatusService::class));
     } catch (Throwable $e) {
         // Expected
     }

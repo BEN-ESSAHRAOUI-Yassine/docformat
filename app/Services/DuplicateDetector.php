@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Enums\ActionOrigin;
+use App\Enums\ActionType;
+use App\Enums\Reversibility;
 use App\Models\BibliographyEntry;
 use Illuminate\Support\Collection;
 
@@ -12,6 +15,10 @@ class DuplicateDetector
         'fuzzy' => 0.7,
         'doi' => 0.99,
     ];
+
+    public function __construct(
+        private ?ActionLogger $actionLogger = null,
+    ) {}
 
     /**
      * Detect duplicate bibliography entries.
@@ -158,10 +165,28 @@ class DuplicateDetector
         $mergeExtra = $merge->extra_fields ?? [];
         $data['extra_fields'] = array_merge($mergeExtra, $keepExtra);
 
+        $deletedEntrySnapshot = $merge->toArray();
+
         $keep->update($data);
 
         // Delete the merged entry
         $merge->delete();
+
+        if ($this->actionLogger) {
+            $this->actionLogger->record($keep->fresh()->document, [
+                'action_type' => ActionType::Merged,
+                'element_type' => 'BibliographyEntry',
+                'element_id' => $keep->id,
+                'origin' => ActionOrigin::Manual,
+                'old_value' => $keep->getOriginal('title'),
+                'new_value' => $data['title'] ?? null,
+                'payload' => [
+                    'deleted_entry' => $deletedEntrySnapshot,
+                    'field_choices' => $fieldChoices,
+                ],
+                'reversibility' => Reversibility::Full,
+            ]);
+        }
 
         return $keep->fresh();
     }

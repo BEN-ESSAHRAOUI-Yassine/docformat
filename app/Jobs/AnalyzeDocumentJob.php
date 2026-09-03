@@ -4,6 +4,8 @@ namespace App\Jobs;
 
 use App\Models\Document;
 use App\Services\DocumentAnalysisService;
+use App\Services\IssueCollector;
+use App\Services\ReviewStatusService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -24,7 +26,7 @@ class AnalyzeDocumentJob implements ShouldQueue
         $this->onQueue('document-processing');
     }
 
-    public function handle(DocumentAnalysisService $service): void
+    public function handle(DocumentAnalysisService $service, IssueCollector $collector, ReviewStatusService $reviewStatus): void
     {
         if (! $this->document->language) {
             $this->document->update(['status' => 'failed']);
@@ -43,6 +45,10 @@ class AnalyzeDocumentJob implements ShouldQueue
         $this->document->update(['status' => 'analyzing']);
 
         $service->analyze($this->document, $version);
+
+        $collector->collect($this->document);
+
+        $reviewStatus->refresh($this->document);
     }
 
     public function failed(\Throwable $exception): void

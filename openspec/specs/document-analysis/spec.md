@@ -28,6 +28,21 @@ The system SHALL track analysis status for each document. The status transitions
 - **WHEN** a user requests analysis on a document that already has a completed analysis
 - **THEN** the system discards the previous analysis results and starts a new analysis
 
+#### Scenario: Analysis records reviewable issues
+
+- **WHEN** analysis completes and quality detection (style, citation, bibliography, abbreviation, duplicate, page-integrity, numbering) produces findings
+- **THEN** the system persists the normalized set of findings as `DocumentIssue` records associated with the analysis, and sets document status to `review_required`
+
+#### Scenario: Collection is read-only on the original
+
+- **WHEN** quality detection runs during analysis
+- **THEN** the original uploaded document is not modified; gathering issues is read-only until a user decides
+
+#### Scenario: Analysis sources quality scoring
+
+- **WHEN** quality scoring or report generation is requested for a document
+- **THEN** the system derives scores and report sections from the document's issues and detected elements
+
 ### Requirement: Document element extraction
 
 The system SHALL extract all structural elements from a DOCX file and store them with their type, content, position, and metadata. Supported element types SHALL include: heading, paragraph, figure, table, caption, source, citation, bibliography, abbreviation, list, page_break, footnote, header, footer, section, appendix.
@@ -46,6 +61,11 @@ The system SHALL extract all structural elements from a DOCX file and store them
 
 - **WHEN** an element is extracted
 - **THEN** the system stores a JSON `metadata` field containing element-specific properties (e.g., font size, style name, indentation for headings; row/column count for tables; image dimensions for figures)
+
+#### Scenario: Manual page break recorded with origin
+
+- **WHEN** a page break is inserted by a user rather than detected automatically
+- **THEN** the page-break element records its origin as `user` in metadata
 
 ### Requirement: Language must be set before analysis
 

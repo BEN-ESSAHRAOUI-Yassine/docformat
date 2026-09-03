@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\DocumentStatus;
 use App\Enums\EnforcementMode;
+use App\Enums\IssueDecision;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -77,5 +78,25 @@ class Document extends Model
     public function abbreviations(): HasMany
     {
         return $this->hasMany(Abbreviation::class);
+    }
+
+    public function actions(): HasMany
+    {
+        return $this->hasMany(DocumentAction::class);
+    }
+
+    public function issues(): HasMany
+    {
+        return $this->hasMany(DocumentIssue::class);
+    }
+
+    public function pendingIssues(): HasMany
+    {
+        return $this->issues()->where('decision', IssueDecision::Pending->value);
+    }
+
+    public function qualityReports(): HasMany
+    {
+        return $this->hasMany(QualityReport::class);
     }
 }
