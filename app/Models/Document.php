@@ -63,4 +63,19 @@ class Document extends Model
     {
         return $this->hasOne(DocumentAnalysis::class)->latestOfMany();
     }
+
+    public function citations(): HasMany
+    {
+        return $this->hasMany(Citation::class);
+    }
+
+    public function bibliographyEntries(): HasMany
+    {
+        return $this->hasMany(BibliographyEntry::class);
+    }
+
+    public function abbreviations(): HasMany
+    {
+        return $this->hasMany(Abbreviation::class);
+    }
 }
