@@ -35,4 +35,17 @@ return [
         ],
     ],
 
+    'ai' => [
+        'default' => env('AI_DEFAULT', 'local'),
+        'groq' => [
+            'api_key' => env('GROQ_API_KEY'),
+            'base_url' => env('GROQ_API_URL', 'https://api.groq.com/openai/v1'),
+            'model' => env('GROQ_MODEL', 'meta-llama/llama-4-scout-17b-16e-instruct'),
+        ],
+    ],
+
+    'retention' => [
+        'document_days' => env('DOCUMENT_RETENTION_DAYS', 365),
+    ],
+
 ];

@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ActionOrigin;
+use App\Enums\ActionType;
+use App\Enums\Reversibility;
 use App\Http\Requests\StoreDocumentRequest;
 use App\Http\Resources\DocumentResource;
 use App\Jobs\AnalyzeDocumentJob;
 use App\Models\Document;
 use App\Models\Project;
+use App\Services\ActionLogger;
 use App\Services\DocumentUploadService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -86,6 +90,13 @@ class DocumentController extends Controller
     public function destroy(Request $request, Project $project, Document $document): JsonResponse
     {
         $this->authorize('delete', [$document, $project]);
+
+        app(ActionLogger::class)->record($document, [
+            'action_type' => ActionType::SecurityEvent->value,
+            'origin' => ActionOrigin::Manual,
+            'reversibility' => Reversibility::None,
+            'payload' => ['event' => 'document_deleted'],
+        ]);
 
         $document->delete();
 

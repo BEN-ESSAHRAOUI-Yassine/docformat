@@ -4,6 +4,7 @@ import { Button } from '../../components/ui/button'
 import { createPageBreak } from '../../api/pageBreaks'
 import IssuePanel from '../../components/issues/IssuePanel'
 import HistoryPanel from '../../components/issues/HistoryPanel'
+import IntelligencePanel from '../../components/issues/IntelligencePanel'
 import Outline from '../../components/issues/Outline'
 
 export default function DocumentView() {
@@ -98,8 +99,16 @@ export default function DocumentView() {
           >
             History
           </button>
+          <button
+            onClick={() => setRightTab('intelligence')}
+            className={`flex-1 py-2 text-sm font-medium ${
+              rightTab === 'intelligence' ? 'border-b-2 border-blue-600 text-blue-700' : 'text-slate-500'
+            }`}
+          >
+            AI
+          </button>
         </div>
-        {rightTab === 'issues' ? <IssuePanel /> : <HistoryPanel />}
+        {rightTab === 'issues' ? <IssuePanel /> : rightTab === 'history' ? <HistoryPanel /> : <IntelligencePanel />}
       </aside>
     </div>
   )

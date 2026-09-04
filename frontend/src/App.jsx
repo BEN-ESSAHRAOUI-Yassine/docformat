@@ -16,6 +16,9 @@ import BibliographyList from './pages/bibliography/BibliographyList'
 import BibliographyDetail from './pages/bibliography/BibliographyDetail'
 import AbbreviationList from './pages/abbreviations/AbbreviationList'
 import QualityReport from './pages/reports/QualityReport'
+import BatchList from './pages/batches/BatchList'
+import BatchCreate from './pages/batches/BatchCreate'
+import BatchDetail from './pages/batches/BatchDetail'
 
 import AppLayout from './components/layout/AppLayout'
 
@@ -46,6 +49,9 @@ export default function App() {
           <Route path="/documents/:id" element={<DocumentView />} />
           <Route path="/documents/:id/issues" element={<DocumentIssues />} />
           <Route path="/documents/:id/report" element={<QualityReport />} />
+          <Route path="/batches" element={<BatchList />} />
+          <Route path="/batches/create" element={<BatchCreate />} />
+          <Route path="/batches/:batchId" element={<BatchDetail />} />
           <Route path="/documents/:id/citations" element={<CitationList />} />
           <Route path="/documents/:id/bibliography" element={<BibliographyList />} />
           <Route path="/documents/:id/bibliography/:entryId" element={<BibliographyDetail />} />

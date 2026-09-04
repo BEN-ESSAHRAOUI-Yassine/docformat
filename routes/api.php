@@ -2,13 +2,16 @@
 
 use App\Http\Controllers\AbbreviationController;
 use App\Http\Controllers\AnalysisController;
+use App\Http\Controllers\BatchController;
 use App\Http\Controllers\BibliographyController;
 use App\Http\Controllers\CitationController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\IntelligenceController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\PageBreakController;
+use App\Http\Controllers\PrivacyController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\QualityController;
 use App\Http\Controllers\ReferenceController;
@@ -25,6 +28,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/user', function (Request $request) {
             return $request->user();
         });
+
+        Route::get('/user/data-export', [PrivacyController::class, 'exportData']);
+        Route::delete('/user/data', [PrivacyController::class, 'deleteData']);
 
         Route::apiResource('projects', ProjectController::class);
 
@@ -69,6 +75,21 @@ Route::prefix('v1')->group(function () {
         Route::post('/documents/{document}/export', [ExportController::class, 'store']);
         Route::get('/documents/{document}/download', [ExportController::class, 'download']);
         Route::get('/documents/{document}/download/stream', [ExportController::class, 'stream']);
+
+        Route::post('/documents/{document}/analyze-intelligence', [IntelligenceController::class, 'analyze']);
+        Route::get('/documents/{document}/similarity', [IntelligenceController::class, 'similarity']);
+        Route::get('/documents/{document}/ai-analysis', [IntelligenceController::class, 'aiAnalysis']);
+        Route::post('/documents/{document}/corrections/run', [IntelligenceController::class, 'runCorrections']);
+        Route::post('/documents/{document}/paraphrase/suggest', [IntelligenceController::class, 'paraphrase']);
+        Route::post('/documents/{document}/synonyms/suggest', [IntelligenceController::class, 'synonyms']);
+        Route::post('/documents/{document}/ai/toggle', [IntelligenceController::class, 'toggle']);
+
+        Route::get('/batches', [BatchController::class, 'index']);
+        Route::post('/batches', [BatchController::class, 'store']);
+        Route::get('/batches/{batch}', [BatchController::class, 'show']);
+        Route::get('/batches/{batch}/items', [BatchController::class, 'items']);
+        Route::post('/batches/{batch}/export', [BatchController::class, 'export']);
+        Route::get('/batches/{batch}/export/download', [BatchController::class, 'exportDownload']);
 
         Route::apiResource('style-profiles', StyleProfileController::class);
         Route::post('/style-profiles/import', [StyleProfileController::class, 'import']);
