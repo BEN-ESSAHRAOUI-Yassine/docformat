@@ -17,4 +17,5 @@ enum ActionType: string
     case IssueEdited = 'issue_edited';
     case IssueIgnored = 'issue_ignored';
     case BulkResolved = 'bulk_resolved';
+    case SecurityEvent = 'security_event';
 }

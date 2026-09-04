@@ -20,6 +20,9 @@ class IssueCollector
         private DuplicateDetector $duplicateDetector,
         private PageIntegrityService $pageIntegrityService,
         private NumberingService $numberingService,
+        private SimilarityEngine $similarityEngine,
+        private AiContentService $aiContentService,
+        private CorrectionEngine $correctionEngine,
     ) {}
 
     /**
@@ -42,9 +45,68 @@ class IssueCollector
             $issues = $issues->concat($this->collectDuplicates($document, $analysis));
             $issues = $issues->concat($this->collectPageIntegrity($document, $analysis));
             $issues = $issues->concat($this->collectNumbering($document, $analysis));
+            $issues = $issues->concat($this->collectIntelligence($document, $analysis));
 
             return $issues->map(fn (DocumentIssue $issue) => $issue->fresh());
         });
+    }
+
+    private function collectIntelligence(Document $document, ?DocumentAnalysis $analysis): Collection
+    {
+        $issues = collect();
+
+        $similarity = $this->similarityEngine->compare($document);
+
+        foreach ($similarity['matches'] as $match) {
+            $issues->push($this->make(
+                $document,
+                $analysis,
+                IssueSource::Similarity,
+                IssueCategory::Other,
+                'info',
+                "Similarity found: \"{$match['text']}\" matches \"{$match['source']}\" ({$match['confidence']} confidence).",
+                'Review the matching section and cite the source if needed.',
+                null,
+                $analysis?->id,
+                probabilistic: true,
+            ));
+        }
+
+        foreach ($this->aiContentService->analyze($document) as $finding) {
+            $issues->push($this->make(
+                $document,
+                $analysis,
+                IssueSource::Ai,
+                IssueCategory::Other,
+                'info',
+                $finding['message'] ?? 'AI analysis finding.',
+                'Review and add references where appropriate.',
+                null,
+                $analysis?->id,
+                probabilistic: true,
+            ));
+        }
+
+        foreach ($this->correctionEngine->run($document) as $correction) {
+            $source = ($correction['category'] ?? '') === 'spelling'
+                ? IssueSource::Spelling
+                : IssueSource::Grammar;
+
+            $issues->push($this->make(
+                $document,
+                $analysis,
+                $source,
+                IssueCategory::Other,
+                'warning',
+                $correction['reason'].": \"{$correction['original']}\" → \"{$correction['suggested']}\".",
+                'Review and apply the suggested correction.',
+                null,
+                $analysis?->id,
+                probabilistic: false,
+            ));
+        }
+
+        return $issues;
     }
 
     private function collectStyle(Document $document, ?DocumentAnalysis $analysis): Collection

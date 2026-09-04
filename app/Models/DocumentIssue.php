@@ -40,6 +40,8 @@ class DocumentIssue extends Model
         'location' => 'array',
         'probabilistic' => 'boolean',
         'reviewed_at' => 'datetime',
+        'description' => 'encrypted',
+        'recommendation' => 'encrypted',
     ];
 
     public function document(): BelongsTo

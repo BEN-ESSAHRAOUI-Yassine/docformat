@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ActionOrigin;
+use App\Enums\ActionType;
+use App\Enums\Reversibility;
 use App\Jobs\ExportJob;
 use App\Models\Document;
+use App\Services\ActionLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -11,9 +15,20 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ExportController extends Controller
 {
+    public function __construct(
+        private ActionLogger $actionLogger,
+    ) {}
+
     public function store(Request $request, Document $document): JsonResponse
     {
         $this->authorize('view', $document);
+
+        $this->actionLogger->record($document, [
+            'action_type' => ActionType::SecurityEvent->value,
+            'origin' => ActionOrigin::Manual,
+            'reversibility' => Reversibility::None,
+            'payload' => ['event' => 'export_triggered'],
+        ]);
 
         ExportJob::dispatch($document, $request->user()?->id);
 

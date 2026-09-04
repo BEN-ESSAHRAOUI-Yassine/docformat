@@ -23,6 +23,11 @@ The system SHALL normalize issues from all detection sources into a single `Docu
 - **WHEN** abbreviation, duplicate, page-integrity, or numbering detection produces findings
 - **THEN** each finding appears as a `DocumentIssue` in the appropriate category
 
+#### Scenario: Collect similarity, AI, grammar, spelling, and paraphrase issues
+
+- **WHEN** similarity, AI-content, correction (grammar/spelling), or paraphrase detection produces findings
+- **THEN** each finding appears as a probabilistic `DocumentIssue` with source `similarity`, `ai`, `grammar`, `spelling`, or `paraphrase` and review mode `similarity`, `ai`, or `grammar`
+
 #### Scenario: List issues for a document
 
 - **WHEN** an owner requests issues for a document

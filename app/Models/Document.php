@@ -23,6 +23,7 @@ class Document extends Model
         'status',
         'language',
         'enforcement_mode',
+        'ai_enabled',
         'current_version_id',
         'file_hash',
     ];
@@ -32,6 +33,7 @@ class Document extends Model
         return [
             'status' => DocumentStatus::class,
             'enforcement_mode' => EnforcementMode::class,
+            'ai_enabled' => 'boolean',
         ];
     }
 

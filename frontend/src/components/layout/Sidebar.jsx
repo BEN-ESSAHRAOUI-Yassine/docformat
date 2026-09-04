@@ -1,10 +1,11 @@
 import { NavLink, useParams } from 'react-router-dom'
-import { LayoutDashboard, FileText, Palette, BookOpen, BookMarked, TextQuote, ShieldAlert, History, FileBarChart } from 'lucide-react'
+import { LayoutDashboard, FileText, Palette, BookOpen, BookMarked, TextQuote, ShieldAlert, History, FileBarChart, Layers } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 
 const mainNav = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/documents', label: 'Documents', icon: FileText },
+  { to: '/batches', label: 'Batches', icon: Layers },
   { to: '/style-profiles', label: 'Style Profiles', icon: Palette },
 ]
 
