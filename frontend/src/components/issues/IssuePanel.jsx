@@ -27,7 +27,8 @@ export default function IssuePanel() {
     setLoading(true)
     try {
       const data = await getIssues(id, { review_mode: mode, per_page: 100 })
-      setIssues(data.issues?.data ?? [])
+      const list = Array.isArray(data.issues) ? data.issues : (data.issues?.data ?? [])
+      setIssues(list)
       setError(null)
     } catch (err) {
       setError(err.message)

@@ -5,6 +5,7 @@ use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\BatchController;
 use App\Http\Controllers\BibliographyController;
 use App\Http\Controllers\CitationController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\HistoryController;
@@ -31,6 +32,7 @@ Route::prefix('v1')->group(function () {
 
         Route::get('/user/data-export', [PrivacyController::class, 'exportData']);
         Route::delete('/user/data', [PrivacyController::class, 'deleteData']);
+        Route::get('/dashboard', [DashboardController::class, 'show']);
 
         Route::apiResource('projects', ProjectController::class);
 

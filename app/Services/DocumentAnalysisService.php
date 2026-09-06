@@ -59,6 +59,7 @@ class DocumentAnalysisService
                 'metadata' => [
                     'element_count' => $elements + count($headings),
                     'hierarchy_warnings' => $hierarchyWarnings,
+                    'sections' => $this->captureSections($phpWord),
                 ],
             ]);
 
@@ -159,7 +160,7 @@ class DocumentAnalysisService
         if ($element instanceof Title) {
             return array_merge($base, [
                 'type' => 'heading',
-                'content' => $element->getText(),
+                'content' => $this->normalizeText($element->getText()),
                 'heading_level' => (int) $element->getDepth(),
                 'metadata' => ['section' => $sectionIndex],
             ]);
@@ -297,7 +298,7 @@ class DocumentAnalysisService
                 'document_id' => $documentId,
                 'type' => 'heading',
                 'element_index' => $heading['index'],
-                'content' => $heading['text'],
+                'content' => $this->normalizeText($heading['text']),
                 'heading_level' => $heading['level'],
                 'metadata' => [
                     'confidence' => $heading['confidence'],
@@ -305,6 +306,59 @@ class DocumentAnalysisService
                 ],
             ]);
         }
+    }
+
+    private function normalizeText(mixed $text): string
+    {
+        if (is_string($text)) {
+            return $text;
+        }
+
+        if ($text instanceof TextRun) {
+            $parts = [];
+            foreach ($text->getElements() as $child) {
+                if ($child instanceof Text) {
+                    $parts[] = $child->getText();
+                }
+            }
+
+            return implode('', $parts);
+        }
+
+        if ($text instanceof Text) {
+            return $text->getText();
+        }
+
+        return is_scalar($text) ? (string) $text : '';
+    }
+
+    /**
+     * Capture per-section page orientation and size from the loaded document.
+     *
+     * @return array<int, array{index: int, orientation: string, width: int, height: int}>
+     */
+    private function captureSections(PhpWord $phpWord): array
+    {
+        $sections = [];
+
+        foreach ($phpWord->getSections() as $sectionIndex => $section) {
+            $style = $section->getStyle();
+            $orientation = $style && method_exists($style, 'getOrientation')
+                ? $style->getOrientation()
+                : 'portrait';
+
+            $width = $style && method_exists($style, 'getPageSizeW') ? (int) $style->getPageSizeW() : 11906;
+            $height = $style && method_exists($style, 'getPageSizeH') ? (int) $style->getPageSizeH() : 16838;
+
+            $sections[] = [
+                'index' => $sectionIndex,
+                'orientation' => $orientation,
+                'width' => $width,
+                'height' => $height,
+            ];
+        }
+
+        return $sections;
     }
 
     private function extractTextFromElement(AbstractElement $element): string

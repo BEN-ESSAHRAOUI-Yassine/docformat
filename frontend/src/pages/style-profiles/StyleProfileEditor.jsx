@@ -106,7 +106,8 @@ export default function StyleProfileEditor() {
       const payload = { name, description, type, language, rules }
       if (isNew) {
         const data = await createStyleProfile(payload)
-        navigate(`/style-profiles/${data.data.id}/edit`, { replace: true })
+        const newId = data?.id ?? data?.data?.id
+        navigate(`/style-profiles/${newId}/edit`, { replace: true })
       } else {
         await updateStyleProfile(id, payload)
         setOriginalRules(JSON.parse(JSON.stringify(rules)))
