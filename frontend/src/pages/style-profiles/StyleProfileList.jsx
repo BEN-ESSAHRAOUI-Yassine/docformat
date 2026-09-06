@@ -90,7 +90,7 @@ export default function StyleProfileList() {
         </div>
         <div className="flex gap-2">
           <Link
-            to="/style-profiles/new"
+            to="/style-profiles/new/edit"
             className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition"
           >
             <Plus size={16} />
@@ -112,7 +112,7 @@ export default function StyleProfileList() {
           <p className="mt-1 text-sm text-slate-500">Get started by creating a new profile.</p>
           <div className="mt-6">
             <Link
-              to="/style-profiles/new"
+              to="/style-profiles/new/edit"
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
             >
               <Plus size={16} />

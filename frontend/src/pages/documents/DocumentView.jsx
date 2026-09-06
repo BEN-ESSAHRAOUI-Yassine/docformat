@@ -6,6 +6,7 @@ import IssuePanel from '../../components/issues/IssuePanel'
 import HistoryPanel from '../../components/issues/HistoryPanel'
 import IntelligencePanel from '../../components/issues/IntelligencePanel'
 import Outline from '../../components/issues/Outline'
+import DocumentViewer from '../../components/issues/DocumentViewer'
 
 export default function DocumentView() {
   const { id } = useParams()
@@ -42,17 +43,7 @@ export default function DocumentView() {
         </div>
 
         <div className="mt-6 border border-slate-200 rounded-lg bg-white p-8 min-h-[400px]">
-          <div className="space-y-4">
-            <p className="text-slate-600 text-justify">
-              Document preview would render here. The structural viewer and navigation highlight
-              in-text citations and paragraphs once analysis is complete.
-            </p>
-            {showMarks && (
-              <p className="text-slate-400 text-sm">
-                _Paragraph mark (interface only)__
-              </p>
-            )}
-          </div>
+          <DocumentViewer showMarks={showMarks} />
         </div>
 
         <div className="mt-6 border-t border-slate-200 pt-4">

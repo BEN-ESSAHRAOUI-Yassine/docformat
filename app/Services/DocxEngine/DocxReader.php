@@ -32,7 +32,64 @@ class DocxReader
             throw new \RuntimeException("DOCX file not found: {$filePath}");
         }
 
-        $this->phpWord = IOFactory::load($filePath);
+        $this->phpWord = IOFactory::load($this->preprocessForPhpWord($filePath));
+    }
+
+    /**
+     * PHPWord's reader crashes on Office Math (m:oMath) elements because the MathML
+     * namespace prefix is not declared when it parses the fragment. To honour the
+     * graceful-failure principle (one unsupported element must not corrupt the whole
+     * document), strip unsupported MathML blocks into a temporary copy before loading.
+     */
+    private function preprocessForPhpWord(string $filePath): string
+    {
+        $zip = new \ZipArchive;
+
+        if ($zip->open($filePath) !== true) {
+            return $filePath;
+        }
+
+        $xml = $zip->getFromName('word/document.xml');
+
+        if ($xml === false) {
+            $zip->close();
+
+            return $filePath;
+        }
+
+        $original = $xml;
+
+        // Remove inline and display math blocks that PHPWord cannot parse.
+        $xml = preg_replace('/<m:oMathPara\b.*?<\/m:oMathPara>/s', '', $xml);
+        $xml = preg_replace('/<m:oMath\b.*?<\/m:oMath>/s', '', $xml);
+
+        // If nothing changed, load the original directly.
+        if ($xml === $original) {
+            $zip->close();
+
+            return $filePath;
+        }
+
+        // Write a temporary copy with the cleaned document.xml.
+        $temp = tempnam(sys_get_temp_dir(), 'docx_');
+        $tempZip = new \ZipArchive;
+        $tempZip->open($temp, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $name = $zip->getNameIndex($i);
+            $contents = $zip->getFromIndex($i);
+
+            if ($name === 'word/document.xml') {
+                $contents = $xml;
+            }
+
+            $tempZip->addFromString($name, $contents);
+        }
+
+        $zip->close();
+        $tempZip->close();
+
+        return $temp;
     }
 
     public function getPhpWord(): ?PhpWord

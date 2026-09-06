@@ -4,7 +4,9 @@ import { useAuthStore } from './stores/authStore'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
 import ForgotPassword from './pages/auth/ForgotPassword'
+import Landing from './pages/Landing'
 import Dashboard from './pages/Dashboard'
+import ProjectCreate from './pages/projects/ProjectCreate'
 import DocumentList from './pages/documents/DocumentList'
 import DocumentUpload from './pages/documents/DocumentUpload'
 import DocumentView from './pages/documents/DocumentView'
@@ -41,9 +43,11 @@ export default function App() {
         <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
         <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
         <Route path="/forgot-password" element={<GuestRoute><ForgotPassword /></GuestRoute>} />
+        <Route path="/" element={<Landing />} />
 
         <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/projects/new" element={<ProjectCreate />} />
           <Route path="/documents" element={<DocumentList />} />
           <Route path="/documents/upload" element={<DocumentUpload />} />
           <Route path="/documents/:id" element={<DocumentView />} />
